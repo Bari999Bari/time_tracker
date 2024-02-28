@@ -31,7 +31,19 @@ def get_start_task_activity_url():
 
 
 @pytest.fixture
+def get_stop_task_activity_url(task):
+    return reverse("stop-activity", kwargs={'id': task.pk})
+
+
+@pytest.fixture
 def start_activity_payload(task):
+    return {
+        "task": task.pk,
+    }
+
+
+@pytest.fixture
+def stop_activity_payload(task):
     return {
         "task": task.pk,
     }
