@@ -20,3 +20,16 @@ class TaskAgregatedByDurationSerializer(serializers.Serializer):
         hours = duration_seconds // 3600
         minutes = (duration_seconds % 3600) // 60
         return '{:02}:{:02}'.format(int(hours), int(minutes))
+
+
+class ReadTaskActivitySerializer(serializers.ModelSerializer):
+    started_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M")
+    finished_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M")
+
+    class Meta:
+        model = TaskActivity
+        fields = (
+            'task',
+            'started_at',
+            'finished_at',
+        )

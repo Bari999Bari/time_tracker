@@ -1,6 +1,7 @@
 from django.urls import path
 
-from core.views import StartTaskActivityView, StopTaskActivityView, TaskAgregatedByDurationAPIView
+from core.views import StartTaskActivityView, StopTaskActivityView, TaskAgregatedByDurationAPIView, \
+    TaskActivitiesAPIView
 
 urlpatterns = [
     path(
@@ -16,4 +17,7 @@ urlpatterns = [
     path('labour-costs/',
          TaskAgregatedByDurationAPIView.as_view(),
          name="labour-costs"),
+    path('task-activities/',
+         TaskActivitiesAPIView.as_view(),
+         name="task-activities"),
 ]

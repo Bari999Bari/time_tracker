@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from core.models import TaskActivity, Task
-from core.serializers import CreateTaskActivitySerializer, TaskAgregatedByDurationSerializer
+from core.serializers import CreateTaskActivitySerializer, TaskAgregatedByDurationSerializer, ReadTaskActivitySerializer
 
 
 class StartTaskActivityView(generics.CreateAPIView):
@@ -45,6 +45,7 @@ class StopTaskActivityView(generics.UpdateAPIView):
             raise ValidationError(code=400, detail='Задача не взята в работу')
         return Response(status=status.HTTP_200_OK)
 
+
 class TaskAgregatedByDurationAPIView(generics.ListAPIView):
     serializer_class = TaskAgregatedByDurationSerializer
     filter_backends = [DjangoFilterBackend]
@@ -64,3 +65,18 @@ class TaskAgregatedByDurationAPIView(generics.ListAPIView):
                 .values('task__name')
                 .annotate(duration=Sum(F('finished_at') - F('started_at')))
                 .order_by('-duration'))
+
+
+class TaskActivitiesAPIView(generics.ListAPIView):
+    serializer_class = ReadTaskActivitySerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = {
+        'started_at': ['gte', 'lte'],
+    }
+
+    def get_queryset(self):
+        # Выбираем только активности текущего пользователя
+        return (TaskActivity.objects
+                .filter(user=self.request.user)
+                .order_by('-started_at')
+                )
