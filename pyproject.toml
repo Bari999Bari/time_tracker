@@ -1,0 +1,5 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "time_tracker.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+django_debug_mode = "keep"
+filterwarnings = "ignore::DeprecationWarning"

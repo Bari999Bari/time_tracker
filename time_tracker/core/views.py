@@ -5,6 +5,7 @@ from django.db.models import Sum, F
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, generics
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -18,6 +19,7 @@ class StartTaskActivityView(generics.CreateAPIView):
 
     queryset = TaskActivity.objects.all()
     serializer_class = CreateUpdateTaskActivitySerializer
+    permission_classes = (IsAuthenticated,)
 
     def create(self, request, *args, **kwargs):
         user_ = request.user
@@ -37,6 +39,7 @@ class StopTaskActivityView(generics.UpdateAPIView):
     queryset = Task.objects.all()
     serializer_class = CreateUpdateTaskActivitySerializer
     lookup_field = 'id'
+    permission_classes = (IsAuthenticated,)
 
     def update(self, request, *args, **kwargs):
         task = self.get_object()
@@ -64,6 +67,7 @@ class TaskAgregatedByDurationAPIView(generics.ListAPIView):
     filterset_fields = {
         'started_at': ['gte', 'lte'],
     }
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         # Выбираем только завершенные активности текущего пользователя
@@ -85,6 +89,7 @@ class TaskActivitiesAPIView(generics.ListAPIView):
     filterset_fields = {
         'started_at': ['gte', 'lte'],
     }
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         # Выбираем только активности текущего пользователя
@@ -98,6 +103,7 @@ class AggregateUserActivitiesAPIView(generics.RetrieveAPIView):
     """Показывает агрегированную сумму трудозатрат в часах
     для конкретного пользователя за определенный промежуток времени."""
     serializer_class = AggregateUserActivitySerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         # Выбираем только активности текущего пользователя
@@ -122,12 +128,15 @@ class AggregateUserActivitiesAPIView(generics.RetrieveAPIView):
 class AggregateAllActivitiesAPIView(AggregateUserActivitiesAPIView):
     """Показывает агрегированную сумму трудозатрат в часах
         для всех пользователей за определенный промежуток времени."""
+
     def get_queryset(self):
         return TaskActivity.objects.filter(finished_at__isnull=False)
 
 
 class DeleteUseractivitiesAPIView(APIView):
     """Очищает данные трекинга конкретного пользователя."""
+    permission_classes = (IsAuthenticated,)
+
     def get_queryset(self):
         return TaskActivity.objects.filter(user=self.request.user)
 
