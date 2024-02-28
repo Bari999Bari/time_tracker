@@ -1,12 +1,14 @@
 import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Sum, F
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from core.models import TaskActivity, Task
-from core.serializers import CreateTaskActivitySerializer
+from core.serializers import CreateTaskActivitySerializer, TaskAgregatedByDurationSerializer
 
 
 class StartTaskActivityView(generics.CreateAPIView):
@@ -42,3 +44,23 @@ class StopTaskActivityView(generics.UpdateAPIView):
         except ObjectDoesNotExist:
             raise ValidationError(code=400, detail='Задача не взята в работу')
         return Response(status=status.HTTP_200_OK)
+
+class TaskAgregatedByDurationAPIView(generics.ListAPIView):
+    serializer_class = TaskAgregatedByDurationSerializer
+    filter_backends = [DjangoFilterBackend]
+    # фильтрация списка трудозатрат(пункт 5 типы запроса) будет
+    # происходить только для завершенных активностей и которые
+    # полностью попадают в период фильтрации
+    filterset_fields = {
+        'started_at': ['gte', 'lte'],
+    }
+
+    def get_queryset(self):
+        # Выбираем только завершенные активности текущего пользователя
+        # группируем по задачам и агрегируем продолжительность
+        return (TaskActivity.objects
+                .filter(user=self.request.user,
+                        finished_at__isnull=False)
+                .values('task__name')
+                .annotate(duration=Sum(F('finished_at') - F('started_at')))
+                .order_by('-duration'))
