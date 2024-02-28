@@ -34,10 +34,29 @@ def task_activity_2(user, task):
                                finished_at=datetime.datetime(2024, 2, 23, 12, 30, 20), )
 
 
-
 @pytest.fixture
 def get_start_task_activity_url():
     return reverse("start-activity")
+
+
+@pytest.fixture
+def get_aggregate_user_activities_url():
+    return reverse("aggregate-user-activities")
+
+
+@pytest.fixture
+def get_aggregate_all_activities_url():
+    return reverse("aggregate-all-activities")
+
+
+@pytest.fixture
+def get_delete_user_activities_url():
+    return reverse("remove-user-activities")
+
+
+@pytest.fixture
+def get_task_activities_url():
+    return reverse("task-activities")
 
 
 @pytest.fixture
