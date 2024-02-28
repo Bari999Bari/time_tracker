@@ -86,17 +86,26 @@ class TaskActivitiesAPIView(generics.ListAPIView):
 class AggregateUserActivitiesAPIView(generics.RetrieveAPIView):
     serializer_class = AggregateUserActivitySerializer
 
-    def get_object(self):
-        started_at__gte = self.request.query_params.get('started_at__gte')
-        started_at__lte = self.request.query_params.get('started_at__lte')
+    def get_queryset(self):
         # Выбираем только активности текущего пользователя
         queryset = (TaskActivity.objects
                     .filter(user=self.request.user,
                             finished_at__isnull=False)
 
                     )
+        return queryset
+
+    def get_object(self):
+        started_at__gte = self.request.query_params.get('started_at__gte')
+        started_at__lte = self.request.query_params.get('started_at__lte')
+        queryset = self.get_queryset()
         if started_at__gte is not None:
-            queryset = queryset.filter(id__gte=started_at__gte)
+            queryset = queryset.filter(started_at__gte=started_at__gte)
         if started_at__lte is not None:
             queryset = queryset.filter(started_at__lte=started_at__lte)
         return queryset.aggregate(total_time=Sum(F('finished_at') - F('started_at')))
+
+
+class AggregateAllActivitiesAPIView(AggregateUserActivitiesAPIView):
+    def get_queryset(self):
+        return TaskActivity.objects.filter(finished_at__isnull=False)
