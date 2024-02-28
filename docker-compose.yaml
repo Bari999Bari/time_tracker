@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  db:
+    container_name: db
+    image: postgres:13.0-alpine
+    environment:
+      - POSTGRES_USER=stillsoft
+      - POSTGRES_PASSWORD=stillsoft
+      - POSTGRES_DB=stillsoft
+    ports:
+      - "5432:5432"
+    networks:
+      - custom
+    volumes:
+      - db_volume:/var/lib/postgresql/data/
+  web:
+    container_name: web
+    build: .
+    command: python time_tracker/manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - custom
+
+
+
+volumes:
+  db_volume:
+
+networks:
+  custom:
+    driver: bridge
