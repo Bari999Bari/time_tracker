@@ -5,7 +5,7 @@ from django.db.models import Sum, F
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, generics
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -37,7 +37,6 @@ class StopTaskActivityView(generics.UpdateAPIView):
     """Прекращает отчет времени по конкретной задаче."""
 
     queryset = Task.objects.all()
-    serializer_class = CreateUpdateTaskActivitySerializer
     lookup_field = 'id'
     permission_classes = (IsAuthenticated,)
 
@@ -55,7 +54,7 @@ class StopTaskActivityView(generics.UpdateAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class TaskAgregatedByDurationAPIView(generics.ListAPIView):
+class TaskAggregatedByDurationAPIView(generics.ListAPIView):
     """Показывает все трудозатраты пользователя за
     определенный промежуток времени, сгруппированные по задачам."""
 
@@ -128,6 +127,8 @@ class AggregateUserActivitiesAPIView(generics.RetrieveAPIView):
 class AggregateAllActivitiesAPIView(AggregateUserActivitiesAPIView):
     """Показывает агрегированную сумму трудозатрат в часах
         для всех пользователей за определенный промежуток времени."""
+
+    permission_classes = (AllowAny,)
 
     def get_queryset(self):
         return TaskActivity.objects.filter(finished_at__isnull=False)
