@@ -1,7 +1,9 @@
 from django.urls import path
 
-from core.views import StartTaskActivityView, StopTaskActivityView, TaskAgregatedByDurationAPIView, \
-    TaskActivitiesAPIView, AggregateUserActivitiesAPIView, AggregateAllActivitiesAPIView
+from core.views import (StartTaskActivityView, StopTaskActivityView, TaskAgregatedByDurationAPIView,
+                        TaskActivitiesAPIView, AggregateUserActivitiesAPIView, AggregateAllActivitiesAPIView,
+                        DeleteUseractivitiesAPIView,
+                        )
 
 urlpatterns = [
     path(
@@ -26,4 +28,7 @@ urlpatterns = [
     path('aggregate-all-activities/',
          AggregateAllActivitiesAPIView.as_view(),
          name="aggregate-all-activities"),
+    path('remove-user-activities/',
+         DeleteUseractivitiesAPIView.as_view(),
+         name="remove-user-activities"),
 ]

@@ -6,6 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from core.models import TaskActivity, Task
 from core.serializers import CreateTaskActivitySerializer, TaskAggregatedByDurationSerializer, \
@@ -109,3 +110,12 @@ class AggregateUserActivitiesAPIView(generics.RetrieveAPIView):
 class AggregateAllActivitiesAPIView(AggregateUserActivitiesAPIView):
     def get_queryset(self):
         return TaskActivity.objects.filter(finished_at__isnull=False)
+
+
+class DeleteUseractivitiesAPIView(APIView):
+    def get_queryset(self):
+        return TaskActivity.objects.filter(user=self.request.user)
+
+    def delete(self, request):
+        self.get_queryset().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

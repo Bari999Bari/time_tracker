@@ -39,6 +39,8 @@ class AggregateUserActivitySerializer(serializers.Serializer):
     total_time = serializers.SerializerMethodField()
 
     def get_total_time(self, obj):
+        if obj.get('total_time') is None:
+            return '00:00'
         seconds = obj.get('total_time').seconds
         hours = seconds // 3600
         minutes = (seconds % 3600) // 60
