@@ -11,7 +11,7 @@ class CreateTaskActivitySerializer(serializers.ModelSerializer):
         )
 
 
-class TaskAgregatedByDurationSerializer(serializers.Serializer):
+class TaskAggregatedByDurationSerializer(serializers.Serializer):
     task_name = serializers.CharField(source='task__name')
     duration = serializers.SerializerMethodField()
 
@@ -33,3 +33,13 @@ class ReadTaskActivitySerializer(serializers.ModelSerializer):
             'started_at',
             'finished_at',
         )
+
+
+class AggregateUserActivitySerializer(serializers.Serializer):
+    total_time = serializers.SerializerMethodField()
+
+    def get_total_time(self, obj):
+        seconds = obj.get('total_time').seconds
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        return '{:02}:{:02}'.format(int(hours), int(minutes))

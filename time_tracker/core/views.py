@@ -8,7 +8,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from core.models import TaskActivity, Task
-from core.serializers import CreateTaskActivitySerializer, TaskAgregatedByDurationSerializer, ReadTaskActivitySerializer
+from core.serializers import CreateTaskActivitySerializer, TaskAggregatedByDurationSerializer, \
+    ReadTaskActivitySerializer, AggregateUserActivitySerializer
 
 
 class StartTaskActivityView(generics.CreateAPIView):
@@ -47,7 +48,7 @@ class StopTaskActivityView(generics.UpdateAPIView):
 
 
 class TaskAgregatedByDurationAPIView(generics.ListAPIView):
-    serializer_class = TaskAgregatedByDurationSerializer
+    serializer_class = TaskAggregatedByDurationSerializer
     filter_backends = [DjangoFilterBackend]
     # фильтрация списка трудозатрат(пункт 5 типы запроса) будет
     # происходить только для завершенных активностей и которые
@@ -80,3 +81,22 @@ class TaskActivitiesAPIView(generics.ListAPIView):
                 .filter(user=self.request.user)
                 .order_by('-started_at')
                 )
+
+
+class AggregateUserActivitiesAPIView(generics.RetrieveAPIView):
+    serializer_class = AggregateUserActivitySerializer
+
+    def get_object(self):
+        started_at__gte = self.request.query_params.get('started_at__gte')
+        started_at__lte = self.request.query_params.get('started_at__lte')
+        # Выбираем только активности текущего пользователя
+        queryset = (TaskActivity.objects
+                    .filter(user=self.request.user,
+                            finished_at__isnull=False)
+
+                    )
+        if started_at__gte is not None:
+            queryset = queryset.filter(id__gte=started_at__gte)
+        if started_at__lte is not None:
+            queryset = queryset.filter(started_at__lte=started_at__lte)
+        return queryset.aggregate(total_time=Sum(F('finished_at') - F('started_at')))
