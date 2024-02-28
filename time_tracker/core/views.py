@@ -9,13 +9,15 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.models import TaskActivity, Task
-from core.serializers import CreateTaskActivitySerializer, TaskAggregatedByDurationSerializer, \
+from core.serializers import CreateUpdateTaskActivitySerializer, TaskAggregatedByDurationSerializer, \
     ReadTaskActivitySerializer, AggregateUserActivitySerializer
 
 
 class StartTaskActivityView(generics.CreateAPIView):
+    """Начинает отчет времени по конкретной задаче."""
+
     queryset = TaskActivity.objects.all()
-    serializer_class = CreateTaskActivitySerializer
+    serializer_class = CreateUpdateTaskActivitySerializer
 
     def create(self, request, *args, **kwargs):
         user_ = request.user
@@ -30,8 +32,10 @@ class StartTaskActivityView(generics.CreateAPIView):
 
 
 class StopTaskActivityView(generics.UpdateAPIView):
+    """Прекращает отчет времени по конкретной задаче."""
+
     queryset = Task.objects.all()
-    serializer_class = CreateTaskActivitySerializer
+    serializer_class = CreateUpdateTaskActivitySerializer
     lookup_field = 'id'
 
     def update(self, request, *args, **kwargs):
@@ -49,6 +53,9 @@ class StopTaskActivityView(generics.UpdateAPIView):
 
 
 class TaskAgregatedByDurationAPIView(generics.ListAPIView):
+    """Показывает все трудозатраты пользователя за
+    определенный промежуток времени, сгруппированные по задачам."""
+
     serializer_class = TaskAggregatedByDurationSerializer
     filter_backends = [DjangoFilterBackend]
     # фильтрация списка трудозатрат(пункт 5 типы запроса) будет
@@ -70,6 +77,9 @@ class TaskAgregatedByDurationAPIView(generics.ListAPIView):
 
 
 class TaskActivitiesAPIView(generics.ListAPIView):
+    """Показывает все временные интервалы занятые работой
+    для конкретного пользователя."""
+
     serializer_class = ReadTaskActivitySerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = {
@@ -85,6 +95,8 @@ class TaskActivitiesAPIView(generics.ListAPIView):
 
 
 class AggregateUserActivitiesAPIView(generics.RetrieveAPIView):
+    """Показывает агрегированную сумму трудозатрат в часах
+    для конкретного пользователя за определенный промежуток времени."""
     serializer_class = AggregateUserActivitySerializer
 
     def get_queryset(self):
@@ -108,11 +120,14 @@ class AggregateUserActivitiesAPIView(generics.RetrieveAPIView):
 
 
 class AggregateAllActivitiesAPIView(AggregateUserActivitiesAPIView):
+    """Показывает агрегированную сумму трудозатрат в часах
+        для всех пользователей за определенный промежуток времени."""
     def get_queryset(self):
         return TaskActivity.objects.filter(finished_at__isnull=False)
 
 
 class DeleteUseractivitiesAPIView(APIView):
+    """Очищает данные трекинга конкретного пользователя."""
     def get_queryset(self):
         return TaskActivity.objects.filter(user=self.request.user)
 
