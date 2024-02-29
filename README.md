@@ -1,5 +1,5 @@
-# test_stilsoft Time_Tracker
-Тестовое задание от компании стилсофт на должность python-backend разработчика
+# Time_Tracker
+Тестовое задание от компании на должность python-backend разработчика
 
 
 ---
