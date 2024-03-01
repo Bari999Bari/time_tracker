@@ -13,5 +13,5 @@ class Task(models.Model):
 class TaskActivity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="activities", null=False)
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="activities", null=False)
-    started_at = models.DateTimeField(auto_now=False, default=datetime.datetime.now(), null=False)
+    started_at = models.DateTimeField(auto_now=False, auto_now_add=True, null=False)
     finished_at = models.DateTimeField(auto_now=False, auto_now_add=False, null=True)
