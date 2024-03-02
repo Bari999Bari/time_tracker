@@ -1,16 +1,21 @@
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from django.db.models import Prefetch, F, Sum, Window
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
 
+from core.models import TaskActivity
 from users.models import User
-from users.serializers import users_serializer
+from users.serializers import UsersWithTasksSerializer
 
 
-class UsersWithTasksAPIView(APIView):
+class UsersWithTasksAPIView(generics.ListAPIView):
     """Получаем всех пользователей с информацией о затраченном времени
     на каждую конкретную задачу."""
 
-    def get(self, request):
-        queryset = User.objects.prefetch_related('activities').all()
-        data = users_serializer(queryset)
-        return Response(data=data, status=status.HTTP_200_OK)
+    serializer_class = UsersWithTasksSerializer
+    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        prefetched = TaskActivity.objects.select_related('task', 'user').annotate(
+            duration=Window(expression=Sum(F('finished_at') - F('started_at')), partition_by=[F('task'), F('user')])
+        ).distinct('task', 'user')
+        return User.objects.prefetch_related(Prefetch('activities', queryset=prefetched))
