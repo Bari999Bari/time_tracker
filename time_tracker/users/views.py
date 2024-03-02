@@ -1,5 +1,6 @@
 from django.db.models import Prefetch, F, Sum, Window
 from rest_framework import generics
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 
 from core.models import TaskActivity
@@ -13,6 +14,7 @@ class UsersWithTasksAPIView(generics.ListAPIView):
 
     serializer_class = UsersWithTasksSerializer
     permission_classes = (AllowAny,)
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         prefetched = TaskActivity.objects.select_related('task', 'user').annotate(
